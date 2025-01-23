@@ -1,0 +1,24 @@
+{
+  "name": "@hexlet/code",
+  "version": "1.0.0",
+  "description": "[![Actions Status](https://github.com/milagrosrojas730/fullstack-javascript-project-138/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/milagrosrojas730/fullstack-javascript-project-138/actions)",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^9.18.0",
+    "jest": "^29.7.0"
+  },
+  "bin": {
+    "page-loader": "./bin/page-loader.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "commander": "^13.1.0"
+  }
+}
