@@ -1,21 +1,52 @@
-import { promises as fs } from 'fs';
-import os from 'os';
+import { jest } from '@jest/globals';
 import path from 'path';
+import nock from 'nock';
+import { promises as fsPromises } from 'fs';
 import pageLoader from '../src/page-loader.js';
 
-describe('Page Loader', () => {
-  let tempDir;
+describe('Error Handling', () => {
+  beforeEach(() => {
+    jest.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit called with code: ${code}`);
+    });
 
-  beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+    nock('https://example.com')
+      .get('/')
+      .reply(200, '<html><body><h1>Mocked Page</h1></body></html>');
   });
 
-  test('descarga una página y la guarda', async () => {
-    const url = 'https://example.com';
-    const filePath = path.join(tempDir, 'example-com.html');
-    await pageLoader(url, tempDir);
+  afterEach(() => {
+    jest.restoreAllMocks();
+    nock.cleanAll();
+  });
 
-    const fileExists = await fs.access(filePath).then(() => true).catch(() => false);
-    expect(fileExists).toBe(true);
+  test('should handle file system errors (no write access)', async () => {
+    jest.spyOn(fsPromises, 'mkdir').mockImplementation(() => {
+      throw new Error('EACCES: permission denied');
+    });
+
+    await expect(pageLoader('https://example.com', '/protected/path'))
+      .rejects.toThrow(/permission denied/i);
+  });
+
+  test('should create output directory if missing', async () => {
+    const outputPath = path.join(process.cwd(), 'nonexistent', 'dir');
+
+    await fsPromises.mkdir(outputPath, { recursive: true });
+
+    await expect(pageLoader('https://example.com', outputPath)).resolves.not.toThrow();
+
+    await expect(fsPromises.access(outputPath)).resolves.not.toThrow();
+  });
+
+  test('should handle network errors', async () => {
+    nock.cleanAll();
+
+    nock('https://example.com')
+      .get('/nonexistent')
+      .reply(404);
+
+    await expect(pageLoader('https://example.com/nonexistent', './output'))
+      .rejects.toThrow(/404/);
   });
 });
