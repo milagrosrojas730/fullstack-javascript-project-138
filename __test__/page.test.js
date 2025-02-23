@@ -65,7 +65,7 @@ describe('PageLoader with Fixtures', () => {
   test('Downloads HTML and resources correctly', async () => {
     const outputHtmlPath = path.join(outputDir, 'google.com.html');
     const expectedHtmlPath = path.join(expectedDir, 'google.com.html');
-    const expectedFilesDir = path.join(expectedDir, 'google-com_files');
+    const expectedFilesDir = path.join(__dirname, '../__fixtures__/expected/google.com_files');
     const outputFilesDir = path.join(outputDir, 'google-com_files');
 
     await pageLoader('https://google.com', outputDir);
