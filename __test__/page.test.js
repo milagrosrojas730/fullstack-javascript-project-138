@@ -76,10 +76,10 @@ describe('PageLoader with Fixtures', () => {
     .replace(/google-com_files\\/g, 'google-com_files/');
 
     const normalizeHtml = (html) => html
-    .replace(/\s+/g, ' ') // Eliminar espacios extra
-    .replace(/>\s+</g, '><') // Eliminar espacios entre etiquetas
-    .replace(/(\s)\/>/g, '>') // Corregir tags autocerrados
-    .replace(/\/>/g, '>') // Corregir tags autocerrados
+    .replace(/\s+/g, ' ') //Eliminar espacios extra
+    .replace(/>\s+</g, '><') //Eliminar espacios entre etiquetas
+    .replace(/(\s)\/>/g, '>') //Corregir tags autocerrados
+    .replace(/\/>/g, '>') //Corregir tags autocerrados
     .replace(/\\/g, '/')
     .trim();
 

@@ -3,4 +3,4 @@ dist/
 coverage/
 temp-test-dir/
 temp/
-__fixtures__/expected
+__fixtures__\expected
