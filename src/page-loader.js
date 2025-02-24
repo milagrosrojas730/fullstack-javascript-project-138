@@ -8,9 +8,9 @@ import Listr from 'listr';
 import * as cheerio from 'cheerio';
 import {  urlToFilename, urlToDirname, getExtension, sanitizeOutputDir} from './utils.js';
 
-const log = debug('page-loader'); //logger
+const log = debug('page-loader'); // logger
 
-//procesa las url 
+// procesa las url 
 const processResource = ($, tagme, attrName, barl, brname, assets) => {
   const $elements = $(tagme).toArray();
   const elementsWithUrls = $elements
@@ -26,7 +26,7 @@ const processResource = ($, tagme, attrName, barl, brname, assets) => {
     $element.attr(attrName, filepath);
   });
 };
-//Obtiene todos los recursos
+// Obtiene todos los recursos
 const processResources = (barl, brname, html) => {
   const $ = cheerio.load(html, { decodeEntities: false });
   const assets = [];
@@ -43,7 +43,7 @@ const downloadAsset = (dirname, { url, filename }) => axios.get(url.toString(), 
   return fs.writeFile(fullPath, response.data);
 });
 
-//Funcion principal
+// Funcion principal
 const pageLoader = (pageUrl, outputDirName = '') => {
   const sanitizedDir = sanitizeOutputDir(outputDirName);
 
