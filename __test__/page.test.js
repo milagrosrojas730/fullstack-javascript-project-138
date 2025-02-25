@@ -1,24 +1,24 @@
-import path from "path";
-import { promises as fs } from "fs";
-import { fileURLToPath } from "url";
-import nock from "nock";
-import fetch from "node-fetch";
-import pageLoader from "../src/page-loader.js";
+import path from 'path';
+import { promises as fs } from 'fs';
+import { fileURLToPath } from 'url';
+import nock from 'nock';
+import fetch from 'node-fetch';
+import pageLoader from '../src/page-loader.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe("PageLoader with Fixtures", () => {
-  const fixturesDir = path.join(__dirname, "../__fixtures__");
-  const outputDir = path.join(fixturesDir, "output");
-  const expectedDir = path.join(fixturesDir, "expected");
+describe('PageLoader with Fixtures', () => {
+  const fixturesDir = path.join(__dirname, '../__fixtures__');
+  const outputDir = path.join(fixturesDir, 'output');
+  const expectedDir = path.join(fixturesDir, 'expected');
 
   beforeEach(async () => {
     await fs.rm(outputDir, { recursive: true, force: true });
     await fs.mkdir(outputDir, { recursive: true });
 
-    nock("https://google.com")
-      .get("/")
+    nock('https://google.com')
+      .get('/')
       .reply(
         200,
         `<!DOCTYPE html>
@@ -39,20 +39,20 @@ describe("PageLoader with Fixtures", () => {
         </html>`,
       );
 
-    nock("https://google.com")
-      .get("/logo.png")
-      .reply(200, "fake-image-content", { "Content-Type": "image/png" });
+    nock('https://google.com')
+      .get('/logo.png')
+      .reply(200, 'fake-image-content', { 'Content-Type': 'image/png' });
 
-    nock("https://google.com")
-      .get("/styles.css")
-      .reply(200, "body { background-color: #f3f3f3; }", {
-        "Content-Type": "text/css",
+    nock('https://google.com')
+      .get('/styles.css')
+      .reply(200, 'body { background-color: #f3f3f3; }', {
+        'Content-Type': 'text/css',
       });
 
-    nock("https://google.com")
-      .get("/script.js")
+    nock('https://google.com')
+      .get('/script.js')
       .reply(200, 'console.log("Hello, world!");', {
-        "Content-Type": "application/javascript",
+        'Content-Type': 'application/javascript',
       });
   });
 
@@ -60,36 +60,35 @@ describe("PageLoader with Fixtures", () => {
     nock.cleanAll();
   });
 
-  test("Mock works correctly", async () => {
-    const response = await fetch("https://google.com/");
+  test('Mock works correctly', async () => {
+    const response = await fetch('https://google.com/');
     const body = await response.text();
-    expect(body).toContain("Welcome to Google");
+    expect(body).toContain('Welcome to Google');
   });
 
-  test("Downloads HTML and resources correctly", async () => {
-    const outputHtmlPath = path.join(outputDir, "google.com.html");
-    const expectedHtmlPath = path.join(expectedDir, "google.com.html");
+  test('Downloads HTML and resources correctly', async () => {
+    const outputHtmlPath = path.join(outputDir, 'google.com.html');
+    const expectedHtmlPath = path.join(expectedDir, 'google.com.html');
     const expectedFilesDir = path.join(
       __dirname,
-      "../__fixtures__/expected/google.com_files",
+      '../__fixtures__/expected/google.com_files',
     );
-    const outputFilesDir = path.join(outputDir, "google-com_files");
+    const outputFilesDir = path.join(outputDir, 'google-com_files');
 
-    await pageLoader("https://google.com", outputDir);
-    const outputHtml = await fs.readFile(outputHtmlPath, "utf-8");
-    const expectedHtml = await fs.readFile(expectedHtmlPath, "utf-8");
+    await pageLoader('https://google.com', outputDir);
+    const outputHtml = await fs.readFile(outputHtmlPath, 'utf-8');
+    const expectedHtml = await fs.readFile(expectedHtmlPath, 'utf-8');
     const normalizedOutputHtml = outputHtml
-      .replace(/google-com_files\\google-com-/g, "google-com_files/google-com-") // Convertir \ en /
-      .replace(/google-com_files\\/g, "google-com_files/");
+      .replace(/google-com_files\\google-com-/g, 'google-com_files/google-com-') // Convertir \ en /
+      .replace(/google-com_files\\/g, 'google-com_files/');
 
-    const normalizeHtml = (html) =>
-      html
-        .replace(/\s+/g, " ") // Eliminar espacios extra
-        .replace(/>\s+</g, "><") // Eliminar espacios entre etiquetas
-        .replace(/(\s)\/>/g, ">") // Corregir tags autocerrados
-        .replace(/\/>/g, ">") // Corregir tags autocerrados
-        .replace(/\\/g, "/")
-        .trim();
+    const normalizeHtml = (html) => html
+      .replace(/\s+/g, ' ') // Eliminar espacios extra
+      .replace(/>\s+</g, '><') // Eliminar espacios entre etiquetas
+      .replace(/(\s)\/>/g, '>') // Corregir tags autocerrados
+      .replace(/\/>/g, '>') // Corregir tags autocerrados
+      .replace(/\\/g, '/')
+      .trim();
 
     expect(normalizeHtml(normalizedOutputHtml)).toEqual(
       normalizeHtml(expectedHtml),
@@ -98,14 +97,14 @@ describe("PageLoader with Fixtures", () => {
     const outputFiles = await fs.readdir(outputFilesDir);
     const expectedFiles = await fs.readdir(expectedFilesDir);
     expect(
-      outputFiles.map((f) => f.replace(/^google[-.]com-/, "")).sort(),
+      outputFiles.map((f) => f.replace(/^google[-.]com-/, '')).sort(),
     ).toEqual(expectedFiles.sort());
     await Promise.all(
       expectedFiles.map(async (file) => {
         const outputFilePath = path.join(outputFilesDir, `google-com-${file}`);
         const expectedFilePath = path.join(expectedFilesDir, file);
-        const outputContent = await fs.readFile(outputFilePath, "utf-8");
-        const expectedContent = await fs.readFile(expectedFilePath, "utf-8");
+        const outputContent = await fs.readFile(outputFilePath, 'utf-8');
+        const expectedContent = await fs.readFile(expectedFilePath, 'utf-8');
         expect(outputContent.trim()).toBe(expectedContent.trim());
       }),
     );
